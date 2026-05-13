@@ -1,7 +1,7 @@
 import json
 import re
 from os import getenv
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 import requests
 from dotenv import load_dotenv
