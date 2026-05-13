@@ -92,8 +92,9 @@ def parse_ollama_output(text: str) -> Dict[str, Any]:
 
 
 def call_ollama(prompt: str) -> Dict[str, Any]:
-    url = f"{OLLAMA_BASE_URL.rstrip('/')}/v1/generate?model={OLLAMA_MODEL}"
+    url = f"{OLLAMA_BASE_URL.rstrip('/')}/v1/generate"
     payload = {
+        "model": OLLAMA_MODEL,
         "prompt": prompt,
         "max_tokens": 250,
         "temperature": 0.2,
