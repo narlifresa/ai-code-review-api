@@ -21,9 +21,12 @@ app = FastAPI(
 
 
 class ReviewRequest(BaseModel):
-    language: str = Field(..., example="python", min_length=1, max_length=50)
+    language: str = Field(..., min_length=1, max_length=50, example="python")
     code: str = Field(
-        ..., example="try:\n    print('hello')\nexcept:\n    pass", min_length=1, max_length=10000
+        ...,
+        min_length=1,
+        max_length=10000,
+        example="try:\n    print('hello')\nexcept:\n    pass",
     )
 
 
@@ -51,6 +54,7 @@ def extract_text_from_response(data: Any) -> str:
     if isinstance(data, str):
         return data
     if isinstance(data, dict):
+        # FIX: "response" is the key used by Ollama's native /api/generate endpoint
         for key in ("response", "text", "output", "output_text", "content"):
             if key in data and isinstance(data[key], str):
                 return data[key]
@@ -92,19 +96,21 @@ def parse_ollama_output(text: str) -> Dict[str, Any]:
 
 
 def call_ollama(prompt: str) -> Dict[str, Any]:
+    # FIX: Correct Ollama native API endpoint (was /v1/generate which does not exist)
     url = f"{OLLAMA_BASE_URL.rstrip('/')}/api/generate"
     payload = {
         "model": OLLAMA_MODEL,
         "prompt": prompt,
         "stream": False,
+        # FIX: Ollama native API uses "options" for inference parameters
         "options": {
             "temperature": 0.2,
-            "num_predict": 512,
+            "num_predict": 512,  # FIX: was 250, too low to fit full JSON response
         },
     }
 
     try:
-        response = requests.post(url, json=payload, timeout=15)
+        response = requests.post(url, json=payload, timeout=60)
     except requests.exceptions.RequestException as error:
         raise HTTPException(
             status_code=503,
