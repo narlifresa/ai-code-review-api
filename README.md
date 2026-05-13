@@ -28,10 +28,12 @@ It uses FastAPI and a local Ollama model to return a structured review with a su
 ```powershell
 git clone https://github.com/your-username/ai-code-review-api.git
 cd ai-code-review-api
-python -m venv venv
-.\venv\Scripts\Activate.ps1
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 ```
+
+> If you use VS Code, the project includes `.vscode/settings.json` to select the local `.venv` interpreter automatically.
 
 ## Ollama Setup
 
