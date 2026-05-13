@@ -21,9 +21,9 @@ app = FastAPI(
 
 
 class ReviewRequest(BaseModel):
-    language: str = Field(..., example="python")
+    language: str = Field(..., example="python", min_length=1, max_length=50)
     code: str = Field(
-        ..., example="try:\n    print('hello')\nexcept:\n    pass"
+        ..., example="try:\n    print('hello')\nexcept:\n    pass", min_length=1, max_length=10000
     )
 
 
@@ -51,7 +51,7 @@ def extract_text_from_response(data: Any) -> str:
     if isinstance(data, str):
         return data
     if isinstance(data, dict):
-        for key in ("text", "output", "output_text", "content"):
+        for key in ("response", "text", "output", "output_text", "content"):
             if key in data and isinstance(data[key], str):
                 return data[key]
         if "choices" in data and isinstance(data["choices"], list):
@@ -92,12 +92,15 @@ def parse_ollama_output(text: str) -> Dict[str, Any]:
 
 
 def call_ollama(prompt: str) -> Dict[str, Any]:
-    url = f"{OLLAMA_BASE_URL.rstrip('/')}/v1/generate"
+    url = f"{OLLAMA_BASE_URL.rstrip('/')}/api/generate"
     payload = {
         "model": OLLAMA_MODEL,
         "prompt": prompt,
-        "max_tokens": 250,
-        "temperature": 0.2,
+        "stream": False,
+        "options": {
+            "temperature": 0.2,
+            "num_predict": 512,
+        },
     }
 
     try:
